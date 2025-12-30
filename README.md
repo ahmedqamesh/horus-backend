@@ -1,6 +1,6 @@
 # Eventy Backend
 
-Eventy Backend is a **Laravel-based RESTful API** designed with clean architecture principles, API versioning, and separation of concerns.  
+Eventy Backend is a **Laravel-based RESTful API** designed with clean architecture principles, API versioning, and separation of concerns.
 The project follows Laravel’s official directory structure while adding a clear **service and query layer** to keep controllers thin and maintainable.
 
 ---
@@ -21,6 +21,11 @@ The project follows Laravel’s official directory structure while adding a clea
 ```text
 eventy-backend/
 ├── app/                         # Main application source code
+│   └── Filters/                # Business logic & query services
+│   │   └── V1/
+│   │   │   └── InvoicesFilter.php # Encapsulated invoice queries
+│   │   │   └── CustomersFilter.php # Encapsulated customer queries
+│   │   └── ApiFilter.php
 │   ├── Http/                    # HTTP layer (API interface)
 │   │   ├── Controllers/         # Request handling logic
 │   │   │   ├── Api/             # API controllers
@@ -41,10 +46,7 @@ eventy-backend/
 │   │           └── InvoiceCollection.php
 │   ├── Models/                  # Eloquent ORM models
 │   ├── Policies/                # Authorization rules
-│   ├── Providers/               # Application service providers
-│   └── Services/                # Business logic & query services
-│       └── V1/
-│           └── CustomerQuery.php # Encapsulated customer queries
+│   └── Providers/               # Application service providers
 ├── routes/                      # Route definitions
 ├── database/                    # Migrations, factories, seeders
 ├── tests/                       # Feature & unit tests
@@ -63,11 +65,13 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
+```
+## Run the server
+```
 php artisan serve --host=localhost --port=8080
 ```
 
 ##  🧠 Architectural Principles
 API Versioning
-
 - All API logic is versioned under Api/V1
 - Allows backward compatibility and safe future changes
