@@ -16,6 +16,7 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
+    
     public function index(Request $request)
     {
         $filter = new CustomersFilter();
