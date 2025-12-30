@@ -8,7 +8,7 @@ use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\CustomerResource;
 use App\Http\Resources\V1\CustomerCollection;
-use App\Services\V1\CustomerQuery;
+use App\Filters\V1\CustomersFilter; 
 use Illuminate\Http\Request;
 
 class CustomerController extends Controller
@@ -18,10 +18,7 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        // return Customer::all();
-        // return new CustomerCollection(Customer::all());
-        // return new CustomerCollection(Customer::paginate());
-        $filter = new CustomerQuery();
+        $filter = new CustomersFilter();
         // queryItems will be an array of arrays [['column', 'operator', 'value']]
         // value is the the value to filter by: (e.g. Postal Code = 12345)
         $queryItems = $filter->transform($request); 
@@ -30,10 +27,9 @@ class CustomerController extends Controller
             return new CustomerCollection(Customer::paginate());
         }
         else {
-            // filters applied, return filtered results paginated
-            return new CustomerCollection(
-                Customer::where($queryItems)->paginate()
-            );
+            // this will fix the issue of losing query parameters in pagination links
+            $customer = Customer::where($queryItems)->paginate();
+            return new CustomerCollection($customer->appends($request->query()));
         }
     }
 
