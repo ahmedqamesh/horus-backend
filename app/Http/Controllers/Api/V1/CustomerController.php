@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\V1;
 
-use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Requests\V1\StoreCustomerRequest;
+use App\Http\Requests\V1\UpdateCustomerRequest;
 use App\Models\Customer;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\V1\CustomerResource;
@@ -16,30 +16,22 @@ class CustomerController extends Controller
     /**
      * Display a listing of the resource.
      */
-    
+    // index is the method that handles GET requests to /customers
     public function index(Request $request)
     {
         $filter = new CustomersFilter();
-        // queryItems will be an array of arrays [['column', 'operator', 'value']]
+        // filterItems will be an array of arrays [['column', 'operator', 'value']]
         // value is the the value to filter by: (e.g. Postal Code = 12345)
-        $queryItems = $filter->transform($request); 
-        if (count($queryItems) == 0) {
-            // no filters applied, return all customers paginated
-            return new CustomerCollection(Customer::paginate());
+        $filterItems = $filter->transform($request); 
+        // GET parameter to include invoices
+        $includeInvoices = $request->query('includeInvoices');
+        $customers = Customer::where($filterItems);
+        if ($includeInvoices == 'true') {
+            $customers = $customers->with('invoices');
         }
-        else {
-            // this will fix the issue of losing query parameters in pagination links
-            $customer = Customer::where($queryItems)->paginate();
-            return new CustomerCollection($customer->appends($request->query()));
-        }
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        // this will fix the issue of losing query parameters in pagination links
+        // this will return all customers in case $filteritems is empty
+        return new CustomerCollection($customers->paginate()->appends($request->query()));
     }
 
     /**
@@ -47,23 +39,20 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        //
+        return new CustomerResource(Customer::create($request->all()));
     }
 
     /**
      * Display the specified resource.
      */
     public function show(Customer $customer)
-    {
+    {   
+        $includeInvoices = request()->query('includeInvoices');  
+        
+        if ($includeInvoices == "true"){
+            return new CustomerResource($customer->loadMissing('invoices'));
+        }
         return new CustomerResource($customer);
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Customer $customer)
-    {
-        //
     }
 
     /**
@@ -71,7 +60,7 @@ class CustomerController extends Controller
      */
     public function update(UpdateCustomerRequest $request, Customer $customer)
     {
-        //
+        $customer->update($request->all());
     }
 
     /**

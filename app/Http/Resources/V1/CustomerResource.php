@@ -23,6 +23,8 @@ class CustomerResource extends JsonResource
             'city' => $this->city,
             'state' => $this->state,
             'postalCode' => $this->postal_code,
+            // Include invoices relationship values only if they are loaded in the controller (in the index method)
+            'invoices' => InvoiceResource::collection($this->whenLoaded('invoices')),
         ];
     }
 }
